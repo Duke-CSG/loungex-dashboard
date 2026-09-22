@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>lounge{x} · 2026 경영관리 대시보드</title>
+<style>
+:root{
+  --ink:#14161a; --ink2:#3d434d; --mut:#767d89; --line:#e4e7ec; --line2:#eef1f4;
+  --bg:#fbfcfd; --card:#ffffff; --brand:#0f5c4d; --brand2:#16887280; --accent:#e07a3f;
+  --pos:#1f9d6b; --neg:#d64545; --warn:#e0a13f; --chip:#f2f5f7;
+  --shadow:0 1px 2px rgba(20,22,26,.04),0 2px 8px rgba(20,22,26,.05);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  -webkit-font-smoothing:antialiased;padding-top:env(safe-area-inset-top,0);padding-bottom:env(safe-area-inset-bottom,0)}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+a{color:inherit}
+/* header */
+header{background:var(--brand);color:#fff;padding:22px 0 0}
+.brandrow{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.logo{font-size:23px;font-weight:800;letter-spacing:-.02em}
+.logo span{color:#8fd9c8}
+.hsub{font-size:13px;color:#bfe5dc;font-weight:500}
+.asof{margin-left:auto;font-size:12px;color:#9fd3c7}
+.tabs{display:flex;gap:2px;margin-top:18px;flex-wrap:wrap}
+.tab{padding:10px 15px;font-size:13.5px;font-weight:600;color:#bfe5dc;cursor:pointer;
+  border-radius:8px 8px 0 0;border:1px solid transparent;border-bottom:none;white-space:nowrap;transition:.12s}
+.tab:hover{color:#fff;background:#ffffff18}
+.tab.on{background:var(--bg);color:var(--brand);border-color:var(--line)}
+.tab b{display:inline-block;width:19px;height:19px;line-height:19px;text-align:center;border-radius:5px;
+  background:#ffffff2a;font-size:11px;margin-right:6px;font-weight:700}
+.tab.on b{background:var(--brand);color:#fff}
+/* sections */
+main{padding:26px 0 70px}
+.panel{display:none;animation:fade .2s ease}
+.panel.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+h2.sec{font-size:12px;font-weight:700;letter-spacing:.04em;color:var(--mut);
+  text-transform:uppercase;margin:0 0 14px;display:flex;align-items:center;gap:9px}
+h2.sec::after{content:"";flex:1;height:1px;background:var(--line)}
+h3{font-size:16px;font-weight:700;margin:0 0 3px;letter-spacing:-.01em}
+.lead{font-size:13.5px;color:var(--ink2);line-height:1.6;max-width:70ch}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px;box-shadow:var(--shadow)}
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}
+@media(max-width:820px){.g2,.g3,.g4{grid-template-columns:1fr}}
+/* mission */
+.mv{background:linear-gradient(135deg,#0f5c4d,#0b4a3e);color:#fff;border:none;padding:26px 28px}
+.mv .lbl{font-size:11px;letter-spacing:.08em;color:#8fd9c8;font-weight:700;margin-bottom:7px}
+.mv .txt{font-size:18px;line-height:1.5;font-weight:600;letter-spacing:-.01em;max-width:64ch}
+.mv+.mv{margin-top:0}
+/* KPI cards */
+.kpi{position:relative}
+.kpi .t{font-size:12.5px;color:var(--mut);font-weight:600;margin-bottom:8px}
+.kpi .v{font-size:26px;font-weight:800;letter-spacing:-.02em;line-height:1}
+.kpi .u{font-size:13px;color:var(--mut);font-weight:600;margin-left:3px}
+.kpi .d{font-size:12px;margin-top:7px;font-weight:600}
+.pos{color:var(--pos)}.neg{color:var(--neg)}.warn{color:var(--warn)}
+.pill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700}
+.pill.pos{background:#e5f6ee;color:#0d7a4f}.pill.neg{background:#fae7e7;color:#b83232}
+.pill.warn{background:#fbf1dd;color:#a9761c}
+.barwrap{margin-top:9px;height:6px;background:var(--line2);border-radius:4px;overflow:hidden}
+.barfill{height:100%;border-radius:4px}
+/* table */
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:9px 10px;text-align:right;border-bottom:1px solid var(--line2)}
+th:first-child,td:first-child{text-align:left}
+thead th{font-size:11px;color:var(--mut);font-weight:700;text-transform:uppercase;letter-spacing:.03em;
+  border-bottom:1.5px solid var(--line);position:sticky;top:0;background:var(--card)}
+tbody tr:hover{background:var(--chip)}
+td.mono{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+.tag{font-size:11px;padding:2px 7px;border-radius:5px;font-weight:700;background:var(--chip);color:var(--ink2)}
+/* chart */
+.chart{width:100%;height:auto;overflow:visible}
+.lgd{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--ink2);margin-top:10px}
+.lgd i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.note{font-size:12px;color:var(--mut);line-height:1.55;margin-top:6px}
+/* callout */
+.call{border-left:3px solid var(--accent);background:#fdf6f1;padding:13px 16px;border-radius:0 8px 8px 0;font-size:13.5px;line-height:1.6;color:#7a4a2c}
+.call.crit{border-color:var(--neg);background:#fdf1f1;color:#8f2f2f}
+.call b{color:inherit}
+/* task */
+.task{border:1px solid var(--line);border-radius:10px;padding:14px 16px;background:var(--card)}
+.task .hd{display:flex;align-items:center;gap:9px;margin-bottom:6px}
+.task .id{font-size:11px;font-weight:800;color:var(--brand);background:#e6f2ee;padding:2px 7px;border-radius:5px}
+.task .nm{font-size:14px;font-weight:700;letter-spacing:-.01em}
+.task .meta{font-size:12px;color:var(--mut);display:flex;gap:12px;flex-wrap:wrap;margin-top:8px}
+.foc{font-size:10.5px;font-weight:800;color:#fff;background:var(--accent);padding:2px 7px;border-radius:5px}
+.step{display:flex;gap:11px;align-items:flex-start;font-size:13.5px;line-height:1.55;color:var(--ink2);margin-bottom:11px}
+.step .n{flex:0 0 24px;height:24px;border-radius:7px;background:var(--brand);color:#fff;font-weight:800;
+  font-size:12px;display:flex;align-items:center;justify-content:center;margin-top:1px}
+.step b{color:var(--ink)}
+.hint{font-size:12.5px;color:var(--mut);margin-top:14px;padding-top:13px;border-top:1px dashed var(--line)}
+
+.opt{display:flex;gap:11px;align-items:flex-start;padding:12px 14px;border:1px solid var(--line);border-radius:9px;margin-bottom:8px;cursor:pointer;transition:.12s;background:var(--card)}
+.opt:hover{border-color:var(--accent);background:#fdf7f3}
+.opt.sel{border-color:var(--accent);background:#fdf0e8;box-shadow:0 0 0 1px var(--accent) inset}
+.opt .chk{font-size:16px;color:var(--accent);flex:0 0 18px;line-height:1.3}
+.p1card:hover{box-shadow:0 3px 14px rgba(224,122,63,.18)}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="brandrow">
+      <div class="logo">lounge<span>{x}</span></div>
+      <div class="hsub">2026 경영관리 대시보드 · 목표–현황–과제 실행 루프</div>
+      <div class="asof">기준: 2026 · 1~8월 실적</div>
+    </div>
+    <nav class="tabs" id="tabs"></nav>
+  </div>
+</header>
+<main class="wrap">
+  <section class="panel" id="p0"></section>
+  <section class="panel" id="p1"></section>
+  <section class="panel" id="p2"></section>
+  <section class="panel" id="p3"></section>
+  <section class="panel" id="p4"></section>
+</main>
+<script>
+const D={"mission": "로봇과 AI로 리테일의 반복노동을 줄여, 고객에게 더 나은 일상을, 운영자에게 더 가치 있는 시간을 제공한다.", "vision": "사람과 로봇이 함께 만드는 수익성 있는 리테일 운영의 표준이 되어, XYZ의 Physical AI가 일상으로 확산되는 실증·데이터 거점이 된다.", "bizDef": "로봇과 AI로 운영하는 리테일 매장을 직접 운영하고(직영·투자모델), 거기서 검증된 모델을 가맹으로 확산하며, 매장에 필요한 원·부자재와 원두를 공급하는 회사", "months": ["1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월"], "kpi": {"REV-C": [226205168, 212994109, 241655011, 298105182, 306328695, 297036313, 333631040, 302636713], "OP-C": [15352032.24, 3479165.84, -19304167.44, -32234334.28, -55256709.04, -47762082.92, -23567814.72, -44107639.16], "EBI-C": [22601134.24, 10728280.84, -12729553.44, -25659726.28, -49033164.04, -41337463.92, -19503133.72, -36308943.16], "OPM-C": [0.07, 0.02, -0.08, -0.11, -0.18, -0.16, -0.07, -0.15], "EBIM-C": [0.1, 0.05, -0.05, -0.09, -0.16, -0.14, -0.06, -0.12], "REV-S": [191200676, 161278386, 212448847, 245617079, 278346423, 273311021, 278840566, 269150149], "OP-S": [-3331969.76, -13570156.16, 2798985.56, -41553204.28, -47015495.04, -34740728.92, -43449776.72, -43095334.16], "REV-F": [35004492, 51715723, 29206164, 52488103, 27982272, 23725292, 54790474, 33486564], "OP-F": [18684002, 17049322, -22103153, 9318870, -8241214, -13021354, 19881962, -1012305], "REV-M": [145753592, 127454867, 175915993, 176797601, 174045073, 156642949, 149561684, 135896197], "OP-M": [110635.64, -624430.36, 18070111.56, 16348220.92, 6247170.16, 9827873.08, 10739633.28, 1795969.8], "EBI-M": [4589484.64, 3854429.64, 21874471.56, 20152574.92, 9222027.16, 12703136.08, 10356082.28, 4943544.8], "CNT-M": [4, 4, 4, 4, 4, 4, 4, 4], "ASP-M": [36438398, 31863716.75, 43978998.25, 44199400.25, 43511268.25, 39160737.25, 37390421, 33974049.25], "SSS-M": [0, -0.13, 0.21, 0.21, 0.19, 0.07, 0.03, -0.07], "GM-M": [0.23, 0.25, 0.33, 0.32, 0.25, 0.3, 0.28, 0.26], "LAB-M": [0.3, 0.36, 0.27, 0.27, 0.32, 0.31, 0.31, 0.33], "REV-U": [45447084, 33823519, 36532854, 68819478, 104301350, 116668072, 129278882, 133253952], "OP-U": [-3442605.4, -12945725.8, -15271126, -57901425.2, -53262665.2, -44568602, -54189410, -44891303.96], "CNT-U": [4, 4, 4, 7, 8, 8, 9, 9], "ASP-U": [11361771, 8455879.75, 9133213.5, 9831354, 13037668.75, 14583509, 14364320.22, 14805994.67], "SSS-U": [0, -0.26, -0.2, -0.26, -0.2, -0.2, -0.17, -0.02], "REV-U-OWN-SRC": [32416552, 23598887, 26266653, 24977669, 24717036, 25888421, 27345393, 32806429], "REV-U-INV-SRC": [13030532, 10224632, 10266201, 43841809, 79584314, 90779651, 101933489, 100447523], "INV-R": [43457760, 49071900, 33746000, 27029200, 28814200, 29734000, 40553500, 61758400], "OP-U-OWN-SRC": [2289493.6, -4557224.8, -3773528, -6271985.2, -3948481.2, -5843950, -4665321, -4771762.4], "OP-U-INV-SRC": [1620187, -836215, -4729512, -26756538, -21555295, -11590587, -21584964, -16410416.56], "OWNER-H": [null, null, null, null, null, null, null, null], "REV-U-OWN": [32416552, 23598887, 26266653, 24977669, 24717036, 25888421, 27345393, 32806429], "OP-U-OWN": [-4462792.4, -11309510.8, -10525814, -26056382.2, -23732878.2, -25628347, -24449718, -24556159.4], "STORES-U-OWN": [3, 3, 3, 3, 3, 3, 3, 3], "UNITREV-U-OWN": [10805517.33, 7866295.67, 8755551, 8325889.67, 8239012, 8629473.67, 9115131, 10935476.33], "SSS-U-OWN": [0, -0.27, -0.19, -0.23, -0.24, -0.2, -0.16, 0.01], "COST-U-OWN": [1.14, 1.48, 1.4, 2.04, 1.96, 1.99, 1.89, 1.75], "LOSS-U-OWN": [3, 3, 3, 3, 3, 3, 3, 3], "REV-U-INV": [13030532, 10224632, 10266201, 43841809, 79584314, 90779651, 101933489, 100447523], "OP-U-INV": [1020187, -1636215, -4745312, -31845043, -29529787, -18940255, -29739692, -20335144.56], "STORES-U-INV": [1, 1, 1, 4, 5, 5, 6, 6], "UNITREV-U-INV": [13030532, 10224632, 10266201, 10960452.25, 15916862.8, 18155930.2, 16988914.83, 16741253.83], "SSS-U-INV": [0, -0.22, -0.21, -0.33, -0.11, -0.21, -0.21, -0.09], "COST-U-INV": [0.92, 1.16, 1.46, 1.73, 1.37, 1.21, 1.29, 1.2], "LOSS-U-INV": [0, 1, 1, 4, 5, 5, 6, 5], "INV-FEE": [null, null, null, null, null, null, null, null], "INV-PREFEE": [null, null, null, null, null, null, null, null], "INV-PAID": [null, null, null, null, null, null, null, null], "INV-UNPAID": [null, null, null, null, null, null, null, null], "ORDERS-U-OWN": [5668, 5705, 6435, 5485, 5812, 6334, 6700, 7402], "ORDERS-U-INV": [2769, 1773, 2274, 9931, 15214, 19207, 22503, 22458]}, "target": {"REV": [374106520.8, 411517172.9, 452668890.2, 497935779.2, 547729357.1, 602502292.8, 662752522.1, 729027774.3], "OP": [86277527.58, 95630190.6, 105918119.9, 117234842.2, 129533970.6, 143183668.6, 157492326.5, 173916159], "EBI": [93526630.2, 102879293.2, 113167222.5, 124483944.8, 136932339.3, 150625573.2, 165688130.5, 182256943.6]}, "segTarget": [{"name": "유인매장", "parent": "매장운영", "annual": 2187502337}, {"name": "무인매장", "parent": "매장운영", "annual": 5392443759}, {"name": "상품(B2B식부자재)", "parent": "식자재유통", "annual": 233330184}, {"name": "제품(로스터리)", "parent": "식자재유통", "annual": 186723720}], "gaps": [{"factor": "가맹 — 개설·로열티·클라우드", "plan": "6월부터 월 3.6개 개설. 기준월까지 누적 10.9개", "status": "미실현 — 개설 0개", "gap": -1548367716, "weight": 0.8571452135}, {"factor": "상품 — 가맹채널 공급", "plan": "가맹점 수 × 월매출 × 부자재 공급비중 23%", "status": "미실현 — 가맹점 없음", "gap": -60020995.74, "weight": 0.03322641558}, {"factor": "제품 — 가맹채널 공급", "plan": "가맹점 수 × 월매출 × 원두 공급비중 7%", "status": "미실현 — 가맹점 없음", "gap": -18267259.57, "weight": 0.01011238735}, {"factor": "유인직영 — 점포당 매출 상승", "plan": "4월부터 상승해 12월에 Capa Max×80% 도달. 점포 4개 유지", "status": "미실현 — 상승하지 않았음", "gap": -119304906, "weight": 0.06604479547}, {"factor": "무인직영 — 점포당 매출 상승", "plan": "4월부터 상승. 점포 3개 유지", "status": "미실현 — 상승하지 않았음", "gap": -45115782.93, "weight": 0.02497518967}, {"factor": "투자모델 — 점포당 매출", "plan": "개점 스케줄대로 6개점 가동 · 4월부터 상승", "status": "미실현", "gap": -15347375.8, "weight": 0.008495998445}, {"factor": "상품 — 기존 B2B 채널", "plan": "기존 거래처 매출 유지", "status": "달성", "gap": 0, "weight": 0}, {"factor": "제품 — 기존 채널", "plan": "기존 채널 매출 유지", "status": "달성", "gap": 0, "weight": 0}], "mvc": [{"id": "MVC-01", "strategy": "대표 매장에서 노동 절감과 경제성을 동시에 증명한다", "why": "비전의 '수익성 있는 표준'은 한 점포에서 먼저 증명돼야 다른 점포·가맹점에 적용할 수 있다. 증명 없는 확산은 가맹점 폐점으로 돌아온다.", "biz": "직영매장(유인·무인)", "kpi": "LAB100 · 점포 공헌이익 · 재방문율"}, {"id": "MVC-02", "strategy": "좋은 커피를 기반으로 시간대별 방문 이유를 확장한다", "why": "점포 수를 늘리지 않기로 했기 때문에, 점포당 매출을 올리는 유일한 방법이다. 직영 목표는 전적으로 이 전략에 달려 있다.", "biz": "직영매장 · 식자재유통", "kpi": "객단가 · 푸드 동반구매율 · 시간대별 매출"}, {"id": "MVC-03", "strategy": "고객 여정 전체를 하나의 운영 품질로 관리한다", "why": "로봇이 켜져 있어도 품절·결제오류로 못 팔면 매출은 0이다. 가맹점주에게 약속할 수 있는 최소 조건이다.", "biz": "직영 · 투자모델 · 가맹", "kpi": "실판매가능시간 · 주문성공률 · 복구시간"}, {"id": "MVC-04", "strategy": "실증과 데이터 생산을 정식 운영에 넣는다", "why": "모회사가 자회사에 기대하는 전략적 기여다. 매출만으로는 존재 이유를 증명하지 못한다.", "biz": "전사 횡단", "kpi": "검수통과 데이터 · 학습활용률 · 무개입 완료율"}, {"id": "MVC-05", "strategy": "검증된 모델을 직영·가맹으로 확산한다", "why": "80억 목표의 54%가 여기서 나온다. 단 검증(게이트)을 통과한 뒤에만 여는 것이 전제다.", "biz": "가맹사업", "kpi": "가맹 개설 수 · 신규점 안정화 기간 · 유지율"}, {"id": "MVC-06", "strategy": "법인 간 역할과 수익 구조를 명확히 한다", "why": "80억 목표의 46%가 여기서 나온다. 단 검증(게이트)을 통과한 뒤에만 여는 것이 전제다.", "biz": "전사 횡단", "kpi": "귀속 검증 · 공통비 배분 기준"}], "tasks": [{"id": "P-001", "strat": "MVC-01", "kpi": "OP-U-OWN", "name": "무인직영 점포당 매출·단위경제 개선", "prio": 1.0, "focus": "아니오", "status": "제안", "prog": 0.0}, {"id": "P-002", "strat": "MVC-02", "kpi": "OP-R", "name": "로스터리 마진·생산원가·가동률 개선", "prio": 2.0, "focus": "아니오", "status": "제안", "prog": 0.0}, {"id": "P-003", "strat": "MVC-02", "kpi": "SSS-M", "name": "유인 기존점 매출 회복 실험", "prio": 3.0, "focus": "아니오", "status": "제안", "prog": 0.0}, {"id": "P-004", "strat": "MVC-06", "kpi": "DEL-G", "name": "상품 고객별 수익성·묶음배송 검증", "prio": 4.0, "focus": "아니오", "status": "제안", "prog": 0.0}, {"id": "P-005", "strat": "MVC-06", "kpi": "EBI-C", "name": "관리손익·상각·재고 데이터 검증", "prio": 1.0, "focus": "아니오", "status": "제안", "prog": 0.0}, {"id": "P-006", "strat": "MVC-01", "kpi": "OP-U-INV", "name": "강남점 임대차 재협상 또는 철수 판단", "prio": 1.0, "focus": "예", "status": "제안", "prog": 0.0}, {"id": "P-007", "strat": "MVC-01", "kpi": "OP-U-OWN", "name": "무인직영 로봇 렌탈 → 매입 전환 검토", "prio": 1.0, "focus": "예", "status": "제안", "prog": 0.0}, {"id": "P-008", "strat": "MVC-03", "kpi": "게이트", "name": "가맹 개시 게이트 9개 지표 측정 개시 · 통과", "prio": 1.0, "focus": "예", "status": "제안", "prog": 0.0}, {"id": "P-009", "strat": "MVC-01", "kpi": "OP-U-INV", "name": "투자모델 위탁수수료 정산기준 확정 · 재협상", "prio": 2.0, "focus": "아니오", "status": "제안", "prog": 0.0}, {"id": "P-010", "strat": "MVC-02", "kpi": "OP-R", "name": "로스터리 고정비 구조 조정", "prio": 2.0, "focus": "아니오", "status": "제안", "prog": 0.0}, {"id": "P-011", "strat": "MVC-01", "kpi": "OP-U-INV", "name": "투자모델 기존점 손실 개선·계약 정산 대사", "prio": 1.0, "focus": "아니오", "status": "제안", "prog": 0.0}], "scorecard": [{"metric": "매출", "target": 8000000000, "actual": 2218592231, "annualized": 3327888347, "ratio": 0.4159860433}, {"metric": "관리 영업손익", "target": null, "actual": -203401549.5, "annualized": -305102324.2, "ratio": null}, {"metric": "EBITDA (상각 가산)", "target": 2000000000, "actual": -151242569.5, "annualized": -226863854.2, "ratio": -0.1134319271}, {"metric": "EBITDA율", "target": 0.25, "actual": -0.06817051253, "annualized": null, "ratio": -0.2726820501}], "diag": [{"name": "성수", "model": "무인직영", "open": "2024-08-22", "rev": [17284168, 11250032, 12549537, 12191182, 13408059, 13077425, 12929514, 17596421], "avg": 13785792, "last": 17596421, "area": "성수동", "type": "오피스+힙플레이스", "foot": "높음", "note": "카페 밀집·유동인구 많은 트렌디 상권. 무인직영 중 최고 매출"}, {"name": "원그로브", "model": "무인직영", "open": "2025-05-02", "rev": [8300252, 7334804, 7693985, 6045596, 5417406, 6202785, 7867745, 7744377], "avg": 7075869, "last": 7744377, "area": "여의도 원그로브", "type": "오피스빌딩 내", "foot": "중간(주중한정)", "note": "오피스 전용. 주말·저녁 공동화. 무인직영 최저권"}, {"name": "서울숲", "model": "무인직영", "open": "2025-05-07", "rev": [6832132, 5014051, 6023131, 6740891, 5891571, 6608211, 6548134, 7465631], "avg": 6390469, "last": 7465631, "area": "성수 서울숲", "type": "주거+공원", "foot": "낮음", "note": "공원 인접 주거지. 목적성 방문 적음. 최저 매출"}, {"name": "용산", "model": "투자모델", "open": "2025-12-29", "rev": [13030532, 10224632, 10266201, 8687250, 11540200, 10279182, 10295596, 11820111], "avg": 10767963, "last": 11820111, "area": "용산", "type": "복합/오피스", "foot": "중간", "note": "투자 1호점. 안정적이나 폭발력 부족"}, {"name": "을지돌담길", "model": "투자모델", "open": "2026-04-06", "rev": [0, 0, 0, 18678773, 17671266, 22671921, 19590154, 17783769], "avg": 19279177, "last": 17783769, "area": "을지로 돌담길", "type": "힙 상권", "foot": "높음", "note": "을지로 핫플. 투자모델 상위 매출"}, {"name": "가락", "model": "투자모델", "open": "2026-04-13", "rev": [0, 0, 0, 8617515, 15799636, 16589358, 15944030, 16582836], "avg": 14706675, "last": 16582836, "area": "가락시장", "type": "주거+시장", "foot": "중간", "note": "생활상권. 중위 매출"}, {"name": "상암", "model": "투자모델", "open": "2026-04-20", "rev": [0, 0, 0, 7858271, 16601581, 16386280, 16714109, 16444911], "avg": 14801030, "last": 16444911, "area": "상암DMC", "type": "오피스밀집", "foot": "중간(주중)", "note": "방송·IT오피스. 주중 편중"}, {"name": "강남", "model": "투자모델", "open": "2026-05-08", "rev": [0, 0, 0, 0, 17971631, 24852910, 26004100, 23467088], "avg": 23073932, "last": 23467088, "area": "강남", "type": "오피스+상업 최고밀도", "foot": "매우높음", "note": "무인 전체 최고 매출. 다만 임차료도 최고(월 4,700만 규모)"}, {"name": "마포프론트원", "model": "투자모델", "open": "2026-07-06", "rev": [0, 0, 0, 0, 0, 0, 13385500, 14348808], "avg": 13867154, "last": 14348808, "area": "마포 프론트원", "type": "스타트업 오피스", "foot": "중간", "note": "개점 2개월. 판단 이르나 초기 안착"}], "mannedAvg": 38814624};
+const M=D.months;
+const won=(v,dp=0)=>v==null?'—':(v/1e8).toFixed(dp)+'억';
+const wonM=(v)=>v==null?'—':Math.round(v/1e6).toLocaleString()+'백만';
+const pct=(v,dp=1)=>v==null?'—':(v*100).toFixed(dp)+'%';
+const num=(v)=>v==null?'—':Math.round(v).toLocaleString();
+const sum=a=>a.reduce((x,y)=>x+(y||0),0);
+const K=D.kpi, T=D.target;
+
+/* ---------- generic line chart (SVG) ---------- */
+function lineChart(series,opts={}){
+  const W=opts.w||620,H=opts.h||230,pl=46,pr=14,pt=16,pb=28;
+  const iw=W-pl-pr, ih=H-pt-pb;
+  let all=[];series.forEach(s=>s.data.forEach(v=>{if(v!=null)all.push(v)}));
+  if(opts.zero)all.push(0);
+  let mn=Math.min(...all),mx=Math.max(...all);
+  if(mn>0)mn=0; const pad=(mx-mn)*0.08||1; mx+=pad; mn-=pad;
+  const x=i=>pl+iw*i/(M.length-1);
+  const y=v=>pt+ih*(1-(v-mn)/(mx-mn));
+  let g='';
+  // zero line
+  if(mn<0&&mx>0){const zy=y(0);g+=`<line x1="${pl}" y1="${zy}" x2="${W-pr}" y2="${zy}" stroke="#c9ced6" stroke-width="1" stroke-dasharray="3 3"/>`}
+  // gridlines + y labels
+  for(let t=0;t<=4;t++){const val=mn+(mx-mn)*t/4;const yy=y(val);
+    g+=`<line x1="${pl}" y1="${yy}" x2="${W-pr}" y2="${yy}" stroke="#eef1f4" stroke-width="1"/>`;
+    g+=`<text x="${pl-8}" y="${yy+3}" text-anchor="end" font-size="10" fill="#98a0ac">${opts.yfmt?opts.yfmt(val):won(val,1)}</text>`}
+  // x labels
+  M.forEach((m,i)=>{g+=`<text x="${x(i)}" y="${H-9}" text-anchor="middle" font-size="10.5" fill="#767d89">${m}</text>`});
+  // series
+  series.forEach(s=>{
+    let path='',dots='';
+    s.data.forEach((v,i)=>{if(v==null)return;const px=x(i),py=y(v);path+=(path?'L':'M')+px+' '+py+' ';
+      dots+=`<circle cx="${px}" cy="${py}" r="3" fill="${s.c}"/>`});
+    if(s.fill){const last=s.data.map((v,i)=>v==null?null:[x(i),y(v)]).filter(Boolean);
+      if(last.length){const a=`M${last[0][0]} ${y(Math.max(0,mn))} `+last.map(p=>`L${p[0]} ${p[1]} `).join('')+`L${last[last.length-1][0]} ${y(Math.max(0,mn))} Z`;
+      g+=`<path d="${a}" fill="${s.c}" opacity=".07"/>`}}
+    g+=`<path d="${path}" fill="none" stroke="${s.c}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>${dots}`;
+  });
+  return `<svg viewBox="0 0 ${W} ${H}" class="chart" preserveAspectRatio="xMidYMid meet">${g}</svg>`;
+}
+function legend(series){return '<div class="lgd">'+series.map(s=>`<span><i style="background:${s.c}"></i>${s.name}</span>`).join('')+'</div>'}
+
+/* grouped bar chart */
+function barChart(cats,series,opts={}){
+  const W=opts.w||620,H=opts.h||230,pl=46,pr=14,pt=16,pb=42;
+  const iw=W-pl-pr,ih=H-pt-pb;
+  let all=[];series.forEach(s=>s.data.forEach(v=>all.push(v||0)));all.push(0);
+  let mn=Math.min(...all),mx=Math.max(...all);if(mn>0)mn=0;const pad=(mx-mn)*0.08||1;mx+=pad;
+  const y=v=>pt+ih*(1-(v-mn)/(mx-mn));
+  const gw=iw/cats.length, bw=Math.min(38,gw/(series.length+1)); 
+  let g='';
+  for(let t=0;t<=4;t++){const val=mn+(mx-mn)*t/4;const yy=y(val);
+    g+=`<line x1="${pl}" y1="${yy}" x2="${W-pr}" y2="${yy}" stroke="#eef1f4"/>`;
+    g+=`<text x="${pl-8}" y="${yy+3}" text-anchor="end" font-size="10" fill="#98a0ac">${opts.yfmt?opts.yfmt(val):won(val,1)}</text>`}
+  const zy=y(0);g+=`<line x1="${pl}" y1="${zy}" x2="${W-pr}" y2="${zy}" stroke="#c9ced6"/>`;
+  cats.forEach((c,i)=>{const cx=pl+gw*i+gw/2;
+    series.forEach((s,j)=>{const v=s.data[i]||0;const bx=cx-(series.length*bw)/2+j*bw;const by=y(Math.max(0,v)),bh=Math.abs(y(v)-zy);
+      g+=`<rect x="${bx}" y="${by}" width="${bw-3}" height="${bh}" rx="2" fill="${s.c}"/>`});
+    g+=`<text x="${cx}" y="${H-9}" text-anchor="middle" font-size="10.5" fill="#767d89">${c}</text>`});
+  return `<svg viewBox="0 0 ${W} ${H}" class="chart">${g}</svg>`;
+}
+
+/* ============ PANEL 0 : 목표 ============ */
+function panel0(){
+  const revA=sum(K['REV-C']), revT=8e9;
+  const ebiA=sum(K['EBI-C']);
+  let h=`<h2 class="sec">01 · 목표 수립 / 2026</h2>
+  <div class="grid g2" style="margin-bottom:22px">
+    <div class="card mv"><div class="lbl">MISSION · 존재 이유</div><div class="txt">${D.mission||''}</div></div>
+    <div class="card mv"><div class="lbl">VISION · 도달할 미래</div><div class="txt">${D.vision||''}</div></div>
+  </div>
+  <div class="card" style="margin-bottom:22px">
+    <h3>사업 정의</h3><p class="lead">${D.bizDef||''}</p>
+  </div>
+  <h2 class="sec">2026 재무 목표 · 스코어카드</h2>
+  <div class="grid g4" style="margin-bottom:14px">`;
+  const sc=[
+    {t:'연간 매출 목표',v:'80억',d:`1~8월 실적 ${won(revA,1)} · 달성 ${pct(revA/revT)}`,cls:'neg'},
+    {t:'연간 EBITDA 목표',v:'20억',d:`요구율 25% · 실적 ${won(ebiA,1)} 적자`,cls:'neg'},
+    {t:'1~8월 관리영업손익',v:won(sum(K['OP-C']),1),d:'3월부터 적자 전환',cls:'neg'},
+    {t:'연환산 매출',v:won(revA/8*12,1),d:'목표의 42% 수준',cls:'warn'},
+  ];
+  sc.forEach(c=>{h+=`<div class="card kpi"><div class="t">${c.t}</div><div class="v ${c.cls}">${c.v}</div><div class="d ${c.cls}">${c.d}</div></div>`});
+  h+=`</div>`;
+  // 월별 목표 vs 실적 라인
+  h+=`<div class="card"><h3>월별 매출 · 목표 대비 실적</h3>
+    <p class="note">목표선(진한 초록)은 연 80억을 월 10% 성장 가중으로 배분한 계획. 실적(주황)은 1~8월 실제.</p>`;
+  h+=lineChart([
+    {name:'목표',data:T.REV,c:'#0f5c4d',fill:false},
+    {name:'실적',data:K['REV-C'],c:'#e07a3f',fill:true},
+  ],{zero:true});
+  h+=legend([{name:'월 매출 목표',c:'#0f5c4d'},{name:'월 매출 실적',c:'#e07a3f'}]);
+  h+=`</div>`;
+  // 세그먼트 목표배분
+  h+=`<div class="card" style="margin-top:14px"><h3>세그먼트별 연간 매출목표 배분</h3>
+  <table><thead><tr><th>세부사업</th><th>상위</th><th>연간목표</th><th>비중</th></tr></thead><tbody>`;
+  const segTot=D.segTarget.reduce((s,x)=>s+x.annual,0);
+  D.segTarget.forEach(s=>{h+=`<tr><td>${s.name}</td><td><span class="tag">${s.parent}</span></td><td class="mono">${won(s.annual,2)}</td><td class="mono">${pct(s.annual/segTot)}</td></tr>`});
+  h+=`</tbody></table>
+  <div class="call" style="margin-top:14px"><b>주의</b> — 무인매장이 목표의 67%(53.9억)를 차지. 그러나 이 목표는 <b>가맹 개설을 전제</b>로 배분됐고, 1~8월 가맹 개설은 0개. 목표 배분 자체의 현실성 재검토가 필요하다.</div>
+  </div>`;
+  return h;
+}
+
+/* ============ PANEL 1 : CSF / KPI ============ */
+function panel1(){
+  let h=`<h2 class="sec">02 · CSF · KPI 체계</h2>
+  <div class="card" style="margin-bottom:20px">
+    <h3>F&B 사업 지표 분해 트리</h3>
+    <p class="lead">매출을 최말단 드라이버까지 분해하면, 개선 레버가 어디에 있는지 보인다. 아래는 lounge{x} 매장운영의 매출 구조.</p>`;
+  h+=`<div style="font-size:13px;line-height:1.9;margin-top:12px;color:var(--ink2)">
+    <b style="color:var(--ink)">매출</b> = 점포 수 × 점포당 매출<br>
+    &nbsp;&nbsp;└ <b style="color:var(--ink)">점포당 매출</b> = 주문 건수 × 객단가<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└ <b style="color:var(--ink)">주문 건수</b> = 방문자 수 × 주문율<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└ <b style="color:var(--ink)">방문자 수</b> = f(입지 · 마케팅 · 재방문율)<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└ <b style="color:var(--ink)">주문율</b> = 방문 중 실제 구매 비율<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└ <b style="color:var(--ink)">객단가</b> = f(메뉴 구성 · 푸드 동반구매율)
+  </div>
+  <div class="call" style="margin-top:14px">무인매장은 여기에 <b>실판매가능시간</b>(로봇 가동률 · 품절 · 결제오류)이라는 고유 드라이버가 추가된다. "로봇이 켜져 있어도 팔 수 없는 시간"이 매출 누수의 핵심.</div>
+  </div>`;
+  // CSF→KPI mapping (MVC)
+  h+=`<h2 class="sec">전략(CSF) → 핵심지표(KPI) 연결</h2>
+  <div class="card"><table><thead><tr><th>전략ID</th><th>전략 (CSF)</th><th>연결 사업</th><th>핵심 지표</th></tr></thead><tbody>`;
+  D.mvc.forEach(m=>{h+=`<tr><td><span class="id" style="font-size:11px;font-weight:800;color:var(--brand)">${m.id}</span></td>
+    <td style="text-align:left;max-width:32ch">${(m.strategy||'').slice(0,46)}</td>
+    <td style="text-align:left"><span class="tag">${m.biz||''}</span></td>
+    <td style="text-align:left;font-size:12px;color:var(--ink2)">${m.kpi||''}</td></tr>`});
+  h+=`</tbody></table></div>`;
+  // 세그먼트별 핵심 KPI 현황 (8월 스냅샷)
+  h+=`<h2 class="sec">세부사업별 핵심 KPI · 8월 스냅샷</h2><div class="grid g3">`;
+  const cards=[
+    {t:'유인직영 · 점포당 매출',k:'ASP-M',f:wonM,dir:'상향'},
+    {t:'유인직영 · 매출총이익률',k:'GM-M',f:v=>pct(v),dir:'상향'},
+    {t:'유인직영 · 인건비율',k:'LAB-M',f:v=>pct(v),dir:'하향'},
+    {t:'무인직영 · 점포당 매출',k:'UNITREV-U-OWN',f:wonM,dir:'상향'},
+    {t:'무인계 · 점포 수',k:'CNT-U',f:num,dir:'상향'},
+    {t:'무인계 · 동일점 증감률',k:'SSS-U',f:v=>pct(v),dir:'상향'},
+  ];
+  cards.forEach(c=>{const arr=K[c.k]||[];const last=arr[7],prev=arr[6];
+    const up=last!=null&&prev!=null&&last>=prev; const good=(c.dir==='상향')?up:!up;
+    h+=`<div class="card kpi"><div class="t">${c.t}</div>
+      <div class="v">${c.f(last)}</div>
+      <div class="d ${good?'pos':'neg'}">${up?'▲':'▼'} 전월 ${c.f(prev)} 대비</div></div>`});
+  h+=`</div>`;
+  h+=`<p class="hint">※ KPI 방향: 인건비율·동일점 하락은 나쁨(하향지표). 무인계 동일점 증감률이 모든 달 마이너스인 점이 구조적 경고 신호.</p>`;
+  return h;
+}
+
+/* ============ PANEL 2 : 현황 & 분석 ============ */
+function panel2(){
+  let h=`<h2 class="sec">03 · 사업 현황 & 분석</h2>`;
+  // 전사 매출 & 손익 추이
+  h+=`<div class="grid g2"><div class="card"><h3>전사 매출 추이</h3>`;
+  h+=lineChart([{name:'매출',data:K['REV-C'],c:'#0f5c4d',fill:true}],{w:560});
+  h+=`</div><div class="card"><h3>전사 관리 영업손익 추이</h3>`;
+  h+=lineChart([{name:'영업손익',data:K['OP-C'],c:'#d64545',fill:true}],{w:560,zero:true});
+  h+=`<p class="note">1~2월 흑자 → 3월 적자 전환 → 5월 최저 -5,526만. 무인매장 확장 시점과 정확히 일치.</p></div></div>`;
+  // 세그먼트별 손익 비교 (bar)
+  h+=`<div class="card" style="margin-top:14px"><h3>세부사업별 월 영업손익 비교</h3>
+  <p class="note">유인직영만 흑자 유지. 무인계(무인직영+투자모델)가 전사 적자를 견인.</p>`;
+  h+=barChart(M,[
+    {name:'유인직영',data:K['OP-M'],c:'#1f9d6b'},
+    {name:'무인계',data:K['OP-U'],c:'#d64545'},
+    {name:'식자재유통',data:K['OP-F'],c:'#e0a13f'},
+  ],{w:760,h:260});
+  h+=legend([{name:'유인직영',c:'#1f9d6b'},{name:'무인계(직영+투자)',c:'#d64545'},{name:'식자재유통',c:'#e0a13f'}]);
+  h+=`</div>`;
+  // 목표 대비 미달 원인분해
+  h+=`<h2 class="sec">목표 미달 · 원인 분해</h2>
+  <div class="card"><h3>계획 대비 매출 갭 -18.1억, 어디서 비었나</h3>
+  <p class="note">1~8월 누계 계획 40.3억 대비 실적 22.2억. 갭의 비중을 원인별로 분해.</p>
+  <table style="margin-top:8px"><thead><tr><th>원인 요소</th><th>상태</th><th>갭 비중</th></tr></thead><tbody>`;
+  D.gaps.filter(g=>g.gap&&g.gap<0).sort((a,b)=>b.weight-a.weight).forEach(g=>{
+    const w=g.weight;const cls=w>0.5?'neg':w>0.05?'warn':'';
+    h+=`<tr><td style="max-width:38ch">${g.factor}</td>
+      <td style="text-align:left"><span class="pill ${g.status.includes('미실현')?'neg':'pos'}">${g.status}</span></td>
+      <td class="mono"><b class="${cls}">${pct(w)}</b>
+      <div class="barwrap"><div class="barfill" style="width:${(w*100).toFixed(0)}%;background:${w>0.5?'#d64545':w>0.05?'#e0a13f':'#c9ced6'}"></div></div></td></tr>`});
+  h+=`</tbody></table>
+  <div class="call crit" style="margin-top:16px"><b>진단 결론(재해석)</b> — 회계상 매출 갭의 85.7%가 "가맹 미개시"로 잡히지만, 이는 <b>원인이 아니라 결과</b>다. 계획에 가맹 매출을 넣어뒀는데 0원이라 생긴 산술적 차이일 뿐. 한 겹 더 파면 <b>직영 점포당 매출이 가맹점주를 설득할 수준이 못 되어</b> 모집이 안 된 것 → 진짜 원인은 <b>직영 단위경제성</b>이다. 레버가 있는 곳은 여기다. (탭 04 제1과제에서 실데이터 진단)</div>
+  </div>`;
+  // 투자모델 심층
+  h+=`<div class="card" style="margin-top:14px"><h3>투자모델(무인 6개점) 왜 적자인가</h3>
+  <p class="lead">1~8월 매출 4.5억, 원가율 80.5%, 판관비율 42.1%. 매출총이익(19.5%)이 판관비를 못 덮어 구조적 적자. 임차료(매출의 34.8%)와 인건비(18.7%)가 핵심.</p>
+  <div class="call" style="margin-top:12px">로봇 매장인데도 인건비가 매출의 18.7%. "무인"의 전제가 실제로는 성립하지 않고 있다. 강남점은 임차료만 월 4,700만 규모로 단일 최대 출혈점.</div></div>`;
+  return h;
+}
+
+/* ============ PANEL 3 : 전략과제 ============ */
+function panel3(){
+  let h=`<h2 class="sec">04 · 전략과제 수립 & 실행관리</h2>
+  <p class="lead" style="margin-bottom:18px">가맹 미개시는 <b>원인이 아니라 결과</b>다. 직영 점포당 매출이 가맹점주를 설득할 수준이 아니어서 모집이 안 된다. 따라서 제1과제는 <b>직영 점포당 매출의 진단과 개선</b>이며, 가맹 개시(P-008)는 그 뒤로 내려간다.</p>`;
+  // 제1과제 강조 카드 (클릭 → 진단 모듈)
+  h+=`<div class="card p1card" onclick="openDiag()" style="cursor:pointer;border:1.5px solid var(--accent);background:linear-gradient(180deg,#fff,#fdf7f3)">
+    <div class="hd" style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+      <span class="id" style="background:var(--accent);color:#fff">제1과제</span>
+      <span class="foc">클릭하면 실데이터 진단이 열립니다 ▸</span></div>
+    <div class="nm" style="font-size:17px;font-weight:800">직영 점포당 매출 진단 · 개선</div>
+    <div class="meta" style="margin-top:9px"><span>핵심KPI · <b style="color:var(--ink2)">무인직영 점포당 매출(UNITREV)</b></span>
+    <span>대조군 · 유인 ${Math.round(D.mannedAvg/1e4).toLocaleString()}만/점 vs 무인 700~1,400만/점</span></div>
+  </div>`;
+  h+=`<div id="diagBox"></div>`;
+  // 나머지 과제
+  const rest=D.tasks.filter(t=>t.id!=='P-008');
+  const focus=rest.filter(t=>t.focus==='예');
+  const back=rest.filter(t=>t.focus!=='예');
+  h+=`<h2 class="sec" style="color:var(--accent);margin-top:24px">병행 집중 과제</h2><div class="grid g3" style="margin-bottom:22px">`;
+  focus.forEach(t=>{h+=taskCard(t,true)});
+  h+=`</div><h2 class="sec">후행 과제 백로그 <span style="text-transform:none;font-weight:500;color:var(--mut)">· 가맹 개시(P-008)는 직영 단위경제성 증명 후 착수</span></h2><div class="grid g2">`;
+  back.forEach(t=>{h+=taskCard(t,false)});
+  // P-008을 후행으로 명시 표시
+  const p8=D.tasks.find(t=>t.id==='P-008');
+  if(p8){h+=`<div class="task" style="opacity:.7;border-style:dashed"><div class="hd"><span class="id">P-008</span><span class="tag" style="background:#eee">후행</span></div>
+    <div class="nm">${p8.name}</div><div class="meta"><span>선행조건 · 제1과제 완료(직영 단위경제성 증명)</span></div></div>`}
+  h+=`</div>`;
+  return h;
+}
+
+/* ---- 제1과제 진단 모듈 ---- */
+function openDiag(){
+  const box=document.getElementById('diagBox');
+  if(box.innerHTML){box.innerHTML='';return;}
+  const dg=D.diag.slice().sort((a,b)=>b.avg-a.avg);
+  const own=D.diag.filter(d=>d.model==='무인직영');
+  const ownAvg=own.reduce((s,d)=>s+d.avg,0)/own.length;
+  const hi=dg[0], lo=dg[dg.length-1];
+  const ratio=(hi.avg/lo.avg).toFixed(1);
+  const mannedM=Math.round(D.mannedAvg/1e4);
+  let h=`<div class="card" style="margin-top:14px;border-color:var(--accent)">
+   <h3>실데이터 진단 · 무인 점포당 매출은 왜 낮은가</h3>
+   <p class="note">1~8월 활동월 평균매출 기준. 무인직영 3개 + 투자모델 6개 전부를 입지와 함께 진단.</p>`;
+  // 1) 점포별 매출 랭킹 바
+  h+=`<div style="margin:16px 0">`;
+  const mx=Math.max(...dg.map(d=>d.avg));
+  dg.forEach(d=>{const w=(d.avg/mx*100).toFixed(0);
+    const footColor=d.foot.includes('높음')?'#1f9d6b':(d.foot.includes('낮음')||d.foot.includes('주중'))?'#d64545':'#e0a13f';
+    h+=`<div style="display:flex;align-items:center;gap:10px;margin-bottom:7px;font-size:13px">
+      <div style="width:78px;text-align:right;font-weight:700">${d.name}</div>
+      <div style="width:52px;font-size:11px;color:var(--mut)">${d.model==='무인직영'?'직영':'투자'}</div>
+      <div style="flex:1;background:var(--line2);border-radius:5px;height:22px;position:relative">
+        <div style="width:${w}%;height:100%;background:${footColor};border-radius:5px"></div>
+        <span style="position:absolute;right:8px;top:2px;font-size:11.5px;font-weight:700;color:#fff;mix-blend-mode:difference">${Math.round(d.avg/1e4).toLocaleString()}만</span>
+      </div>
+      <div style="width:96px;font-size:11px;color:var(--mut)">${d.foot}</div></div>`});
+  h+=`</div>`;
+  h+=`<div class="lgd"><span><i style="background:#1f9d6b"></i>유동인구 높음</span><span><i style="background:#e0a13f"></i>중간</span><span><i style="background:#d64545"></i>낮음/주중한정</span></div>`;
+  // 2) 판정
+  h+=`<div style="margin-top:20px" class="grid g3">
+    <div class="card kpi"><div class="t">무인 최고 vs 최저</div><div class="v">${ratio}배</div><div class="d">${hi.name}(${Math.round(hi.avg/1e4)}만) vs ${lo.name}(${Math.round(lo.avg/1e4)}만)</div></div>
+    <div class="card kpi"><div class="t">무인직영 평균</div><div class="v">${Math.round(ownAvg/1e4)}만<span class="u">/점</span></div><div class="d neg">유인 ${mannedM.toLocaleString()}만의 ${(ownAvg/D.mannedAvg*100).toFixed(0)}% 수준</div></div>
+    <div class="card kpi"><div class="t">가맹점주 월이익(추정)</div><div class="v neg">~300만</div><div class="d neg">이 매출론 점주 설득 불가</div></div>
+  </div>`;
+  // 3) 세 가설 판정
+  h+=`<h3 style="margin-top:22px">세 가설 중 무엇인가</h3>
+  <table style="margin-top:8px"><thead><tr><th>가설</th><th>검증 결과</th><th>판정</th></tr></thead><tbody>
+  <tr><td style="max-width:26ch"><b>① 입지 차등</b><br><span style="color:var(--mut);font-size:12px">자리에 따라 매출이 갈린다</span></td>
+    <td style="text-align:left">유동인구 높은 성수·을지·강남 1,400~2,300만 vs 낮은 서울숲·원그로브 640~710만. <b>${ratio}배 격차가 입지와 정확히 일치.</b></td>
+    <td><span class="pill neg">지배적 요인</span></td></tr>
+  <tr><td style="max-width:26ch"><b>② 구조적 천장</b><br><span style="color:var(--mut);font-size:12px">무인 포맷의 한계</span></td>
+    <td style="text-align:left">만약 구조적 천장이면 좋은 입지도 낮아야 함. 그러나 강남·을지는 2,000만 안팎 달성. <b>천장은 포맷이 아니라 나쁜 입지에만 존재.</b></td>
+    <td><span class="pill warn">부분 기각</span></td></tr>
+  <tr><td style="max-width:26ch"><b>③ 미실행 개선책</b><br><span style="color:var(--mut);font-size:12px">아직 안 해본 게 있다</span></td>
+    <td style="text-align:left">동일점 증감률(SSS-U) 전월 마이너스 지속 = 기존점 자연성장은 정체. 운영개선 여지는 있으나 입지 격차를 뒤집을 규모는 아님.</td>
+    <td><span class="pill warn">보조적</span></td></tr>
+  </tbody></table>`;
+  // 4) 결론
+  h+=`<div class="call crit" style="margin-top:16px"><b>진단 결론</b> — 무인 점포당 매출 부진의 <b>지배적 원인은 입지 차등</b>이다. 무인 포맷 자체의 구조적 천장은 근거가 약하다(좋은 입지에선 2,000만 이상 나옴). 따라서 개선 전략의 축은 <b>①나쁜 입지 점포의 처리 ②출점 기준의 전환 ③가맹 프로토타입을 고매출 입지/포맷으로 재정의</b> 세 가지다. 운영개선(③)은 보조 레버로 병행한다.</div>`;
+  // 5) 개선책 선택
+  h+=`<h3 style="margin-top:22px">택할 수 있는 개선책 — 선택하세요</h3>
+  <p class="note">각 개선책을 클릭하면 선택됨(경영진 의사결정 기록용). 여러 개 선택 가능.</p>
+  <div id="optList" style="margin-top:12px">`;
+  const opts=[
+   {id:'O1',t:'저매출 점포 정리 (서울숲·원그로브)',d:'월 640~710만 점포는 가맹 프로토타입으로 부적합. 철수 또는 재입지. 손실 즉시 차단.',tag:'구조'},
+   {id:'O2',t:'출점 기준을 "유동인구 상위 입지"로 고정',d:'성수·을지·강남 수준의 입지에만 출점. 향후 가맹 모집 시 이 입지 데이터를 셀링포인트로.',tag:'구조'},
+   {id:'O3',t:'가맹 프로토타입을 고매출 입지로 재정의',d:'강남·을지(2,000만+) 1~2개를 "가맹 표준모델"로 지정, 점주 수익 시뮬을 이 매출로 작성.',tag:'전략'},
+   {id:'O4',t:'유인/하이브리드 가맹 옵션 검토',d:'유인 점포당 매출은 무인의 4배(3,881만). 로봇 부분도입 하이브리드로 점주 이익 극대화 검토.',tag:'전략'},
+   {id:'O5',t:'무인 운영개선 실험 (객단가·시간대)',d:'푸드 동반구매·피크시간 프로모션으로 기존점 매출 +10~15% 시도. 입지 한계 내 최대화.',tag:'운영'},
+   {id:'O6',t:'실판매가능시간 개선 (품절·결제오류)',d:'로봇 가동률·품절·결제실패로 인한 매출누수 측정 후 제거. 무인 고유 레버.',tag:'운영'},
+  ];
+  opts.forEach(o=>{h+=`<div class="opt" data-id="${o.id}" onclick="pickOpt('${o.id}')">
+    <div class="chk">○</div>
+    <div style="flex:1"><div style="font-weight:700;font-size:14px">${o.t} <span class="tag" style="margin-left:6px">${o.tag}</span></div>
+    <div style="font-size:12.5px;color:var(--ink2);margin-top:3px;line-height:1.5">${o.d}</div></div></div>`});
+  h+=`</div>
+  <div id="pickSummary" class="hint">선택한 개선책이 여기 요약됩니다 → 다음 임원미팅 안건으로 확정.</div>`;
+  h+=`</div>`;
+  box.innerHTML=h;
+  box.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+const picked=new Set();
+function pickOpt(id){
+  const el=document.querySelector(`.opt[data-id="${id}"]`);
+  if(picked.has(id)){picked.delete(id);el.classList.remove('sel');el.querySelector('.chk').textContent='○';}
+  else{picked.add(id);el.classList.add('sel');el.querySelector('.chk').textContent='●';}
+  const names={O1:'저매출 점포 정리',O2:'출점 기준 전환',O3:'가맹 프로토타입 재정의',O4:'유인/하이브리드 가맹',O5:'무인 운영개선',O6:'실판매가능시간 개선'};
+  const s=document.getElementById('pickSummary');
+  if(picked.size===0){s.innerHTML='선택한 개선책이 여기 요약됩니다 → 다음 임원미팅 안건으로 확정.';s.style.color='';}
+  else{s.innerHTML='<b>선택된 개선책('+picked.size+'):</b> '+[...picked].map(i=>names[i]).join(' · ')+' <br>→ 이 조합을 다음 임원미팅에서 담당·기한 배정.';s.style.color='var(--ink)';}
+}
+
+function taskCard(t,foc){
+  const kpiMap={'게이트':'가맹 게이트','OP-U-OWN':'무인직영 손익','OP-U-INV':'투자모델 손익','OP-R':'로스터리 손익','SSS-M':'유인 동일점','DEL-G':'배송효율','EBI-C':'전사 EBITDA'};
+  return `<div class="task"><div class="hd"><span class="id">${t.id}</span>
+    ${foc?'<span class="foc">집중</span>':''}
+    <span class="tag">${t.strat}</span></div>
+    <div class="nm">${t.name}</div>
+    <div class="meta"><span>핵심KPI · <b style="color:var(--ink2)">${kpiMap[t.kpi]||t.kpi}</b></span>
+    <span>우선순위 P${t.prio}</span><span>상태 · ${t.status}</span></div></div>`;
+}
+
+/* ============ PANEL 4 : 지표 리뷰 ============ */
+function panel4(){
+  let h=`<h2 class="sec">05 · 지표 리뷰 루프</h2>
+  <div class="card" style="margin-bottom:20px"><h3>경영관리 루프 — 이 대시보드의 사용법</h3>
+  <div class="step" style="margin-top:14px"><div class="n">1</div><div><b>목표 확인</b> (탭 01) — 우리가 어디로 가기로 했나. 80억 / EBITDA 20억.</div></div>
+  <div class="step"><div class="n">2</div><div><b>현재 스코어 인식</b> (탭 02·03) — 지금 몇 점인가. 매출 달성 42%, 적자 -20억.</div></div>
+  <div class="step"><div class="n">3</div><div><b>문제 공유</b> (탭 03) — 무엇이 가장 문제인가. 가맹 미개시(갭의 86%).</div></div>
+  <div class="step"><div class="n">4</div><div><b>과제 실행</b> (탭 04) — 문제를 푸는 과제에 자원을 몬다.</div></div>
+  <div class="step"><div class="n">5</div><div><b>지표 리뷰</b> (이 탭) — 과제 실행 후 KPI가 움직였는지 확인 → 다음 과제로.</div></div>
+  </div>`;
+  h+=`<h2 class="sec">월간 리뷰 · 핵심지표 추적표</h2>
+  <div class="card"><table><thead><tr><th>지표</th>${M.map(m=>`<th>${m}</th>`).join('')}<th>추세</th></tr></thead><tbody>`;
+  const rows=[
+    {n:'전사 매출',k:'REV-C',f:v=>won(v,1)},
+    {n:'전사 영업손익',k:'OP-C',f:v=>won(v,1)},
+    {n:'전사 EBITDA',k:'EBI-C',f:v=>won(v,1)},
+    {n:'유인직영 손익',k:'OP-M',f:v=>wonM(v)},
+    {n:'무인계 손익',k:'OP-U',f:v=>wonM(v)},
+    {n:'유통 손익',k:'OP-F',f:v=>wonM(v)},
+    {n:'무인 점포수',k:'CNT-U',f:num},
+  ];
+  rows.forEach(r=>{const a=K[r.k]||[];h+=`<tr><td>${r.n}</td>`+
+    a.map(v=>`<td class="mono ${v!=null&&v<0?'neg':''}">${r.f(v)}</td>`).join('')+
+    `<td>${spark(a)}</td></tr>`});
+  h+=`</tbody></table>
+  <p class="hint">※ 매월 마감 후 이 표를 갱신하면, 전략과제가 실제로 지표를 움직였는지 한눈에 보인다. 다음 리뷰에서 개선 없는 과제는 방식을 바꾸거나 폐기한다.</p></div>`;
+  return h;
+}
+function spark(a){const v=a.filter(x=>x!=null);if(v.length<2)return'';const W=64,H=18;
+  let mn=Math.min(...v),mx=Math.max(...v);if(mn===mx){mn-=1;mx+=1}
+  const pts=a.map((x,i)=>x==null?null:`${(i/(a.length-1)*W).toFixed(1)},${(H-(x-mn)/(mx-mn)*H).toFixed(1)}`).filter(Boolean).join(' ');
+  const up=v[v.length-1]>=v[0];
+  return `<svg width="${W}" height="${H}" style="vertical-align:middle"><polyline points="${pts}" fill="none" stroke="${up?'#1f9d6b':'#d64545'}" stroke-width="1.5"/></svg>`}
+
+/* ---------- init ---------- */
+const TABS=[['목표수립',panel0],['CSF · KPI',panel1],['현황 · 분석',panel2],['전략과제',panel3],['지표리뷰',panel4]];
+const tabsEl=document.getElementById('tabs');
+TABS.forEach((t,i)=>{const b=document.createElement('div');b.className='tab'+(i===0?' on':'');
+  b.innerHTML=`<b>${i+1}</b>${t[0]}`;b.onclick=()=>show(i);tabsEl.appendChild(b)});
+function show(i){document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('on',i===j));
+  document.querySelectorAll('.panel').forEach((p,j)=>p.classList.toggle('on',i===j));window.scrollTo({top:0,behavior:'smooth'})}
+TABS.forEach((t,i)=>{document.getElementById('p'+i).innerHTML=t[1]()});
+document.getElementById('p0').classList.add('on');
+</script>
+</body>
+</html>
